@@ -1,0 +1,86 @@
+#include "imports/stdlib.fc";
+
+;; op-codes
+const int op::bet = 1001;
+const int op::calculate = 1002;
+
+;; errors
+const int error::insufficient_balance = 501;
+const int error::invalid_address = 502;
+
+;; storage
+global slice ctx_owner_address;
+
+() load_data() impure {
+    var ds = get_data().begin_parse();
+
+    ctx_owner_address = ds~load_msg_addr();
+
+    ds.end_parse();
+}
+
+(slice, slice) get_addresses () method_id {
+    load_data();
+
+    return (ctx_owner_address, my_address());
+}
+
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    if (in_msg_body.slice_empty?()) {
+        return ();
+    }
+
+    var cs = in_msg_full.begin_parse();
+
+    var flags = cs~load_uint(4);
+
+    if(flags & 1) {
+        return ();
+    }
+    
+    slice sender = cs~load_msg_addr();
+
+    load_data();
+    
+    int op = in_msg_body~load_uint(32);
+
+    if(op == op::bet) {
+        throw_unless(error::insufficient_balance, msg_value < my_balance * 2);
+
+        send_raw_message(
+            begin_cell()
+                .store_uint(0x18, 6)
+                .store_slice(my_address())
+                .store_coins(0)
+                .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+                .store_uint(op::calculate, 32)
+                .store_slice(sender)
+                .store_coins(msg_value)
+            .end_cell(),
+            64
+        );
+    } elseif (op == op::calculate) {
+        throw_unless(error::invalid_address, equal_slice_bits(sender, my_address()));
+
+        slice user = in_msg_body~load_msg_addr();
+
+        int bet = in_msg_body~load_coins();
+
+        randomize_lt();
+    
+        int x = rand(2);
+
+        ;; user won
+        if (x == 1) { 
+            send_raw_message(
+                begin_cell()
+                    .store_uint(0x18, 6)
+                    .store_slice(user)
+                    .store_coins(bet * 2)
+                    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+                .end_cell(),
+                3
+            );
+        }
+    }
+}
