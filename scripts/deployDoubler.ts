@@ -5,6 +5,7 @@ import { compile, NetworkProvider } from '@ton/blueprint';
 export async function run(provider: NetworkProvider) {
     const doubler = provider.open(Doubler.createFromConfig({
         owner: provider.sender().address as Address,
+        skipAddress: Address.parse('Ef-osb6v7ABZsw0ZPtBy-cUku6jOghW63dybP0FgImz9l9N7'),
     }, await compile('Doubler')));
 
     await doubler.sendDeploy(provider.sender(), toNano('0.05'));

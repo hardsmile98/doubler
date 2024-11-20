@@ -2,10 +2,11 @@ import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, 
 
 export type DoublerConfig = {
     owner: Address
+    skipAddress: Address
 };
 
 export function doublerConfigToCell(config: DoublerConfig): Cell {
-    return beginCell().storeAddress(config.owner).endCell();
+    return beginCell().storeAddress(config.owner).storeAddress(config.skipAddress).endCell();
 }
 
 export class Doubler implements Contract {
@@ -29,14 +30,14 @@ export class Doubler implements Contract {
         });
     }
 
-    async getAddresses(provider: ContractProvider) {
-        const result = (await provider.get('get_addresses', [])).stack;
+    async getStorage(provider: ContractProvider) {
+        const result = (await provider.get('get_storage', [])).stack;
         const owner = result.readAddress();
-        const contract = result.readAddress();
+        const skipAddress = result.readAddress();
 
         return {
             owner,
-            contract,
+            skipAddress,
         }
     }
 
