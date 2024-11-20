@@ -36,6 +36,8 @@ global slice skip_address;
         return ();
     }
     
+    load_data();
+
     slice sender = cs~load_msg_addr();
 
     int op = in_msg_body~load_uint(32);
