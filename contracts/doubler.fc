@@ -8,75 +8,36 @@ const int op::calculate = 1002;
 const int error::insufficient_balance = 501;
 const int error::invalid_address = 502;
 
-;; storage
-global slice ctx_owner_address;
-global slice skip_address;
+int slices_equal? (slice a, slice b) asm "SDEQ";
 
-() load_data() impure {
-    var ds = get_data().begin_parse();
+const slice skip_address = "Ef94BG3tNmX8_tHtFTgmkz4c7PeCH33_cxQLbgIvvl4NoN5c"a;
 
-    ctx_owner_address = ds~load_msg_addr();
-    skip_address = ds~load_msg_addr();
-
-    ds.end_parse();
-}
-
-(slice, slice) get_storage () method_id {
-    load_data();
-
-    return (ctx_owner_address, skip_address);
-}
-
-() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+() recv_internal (int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
     var cs = in_msg_full.begin_parse();
-
+    
     var flags = cs~load_uint(4);
 
     if (flags & 1) {
         return ();
     }
     
-    load_data();
-
     slice sender = cs~load_msg_addr();
-
     int op = in_msg_body~load_uint(32);
 
-    if(op == op::bet) {
+    if (op == op::bet) {
         send_raw_message(
             begin_cell()
                 .store_uint(0x18, 6)
                 .store_slice(skip_address)
-                .store_coins(my_balance)
+                .store_coins(0)
                 .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
                 .store_uint(op::calculate, 32)
                 .store_slice(sender)
-                .store_coins(msg_value)
             .end_cell(),
-            2
+            0
         );
-    } elseif (op == op::calculate) {
-        throw_unless(error::invalid_address, equal_slice_bits(sender, skip_address));
+    }
+    elseif (op == op::calculate ) {
 
-        slice user = in_msg_body~load_msg_addr();
-
-        int bet = in_msg_body~load_coins();
-
-        randomize_lt();
-    
-        int x = rand(2);
-
-        ;; user won
-        if (x == 1) { 
-            send_raw_message(
-                begin_cell()
-                    .store_uint(0x18, 6)
-                    .store_slice(user)
-                    .store_coins(bet * 2)
-                    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-                .end_cell(),
-                3
-            );
-        }
     }
 }

@@ -1,12 +1,9 @@
 import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode } from '@ton/core';
 
-export type DoublerConfig = {
-    owner: Address
-    skipAddress: Address
-};
+export type DoublerConfig = {};
 
-export function doublerConfigToCell(config: DoublerConfig): Cell {
-    return beginCell().storeAddress(config.owner).storeAddress(config.skipAddress).endCell();
+export function doublerConfigToCell(): Cell {
+    return beginCell().endCell();
 }
 
 export class Doubler implements Contract {
@@ -17,7 +14,7 @@ export class Doubler implements Contract {
     }
 
     static createFromConfig(config: DoublerConfig, code: Cell, workchain = 0) {
-        const data = doublerConfigToCell(config);
+        const data = doublerConfigToCell();
         const init = { code, data };
         return new Doubler(contractAddress(workchain, init), init);
     }
@@ -33,11 +30,9 @@ export class Doubler implements Contract {
     async getStorage(provider: ContractProvider) {
         const result = (await provider.get('get_storage', [])).stack;
         const owner = result.readAddress();
-        const skipAddress = result.readAddress();
 
         return {
             owner,
-            skipAddress,
         }
     }
 

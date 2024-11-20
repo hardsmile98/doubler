@@ -1,7 +1,5 @@
 #include "imports/stdlib.fc";
 
-const int min_balance = 1000000000;
-
 () recv_internal (int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
     var cs = in_msg_full.begin_parse();
 
@@ -17,10 +15,10 @@ const int min_balance = 1000000000;
         begin_cell()
             .store_uint(0x18, 6)
             .store_slice(sender)
-            .store_coins(my_balance - min_balance)
+            .store_coins(msg_value)
             .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
             .store_slice(in_msg_body)
         .end_cell(),
-        2
+        64
     );
 }
