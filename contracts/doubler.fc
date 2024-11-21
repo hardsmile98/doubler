@@ -32,6 +32,8 @@ const slice skip_address = "EQB-IYDWa-H6QwFLw04_c50RwbNuEFtbJxPGkfpwZ6vtsaD2"a;
         throw_if(error::min_bet, msg_value < min_bet);
         throw_if(error::insufficient_balance, msg_value * 2 > my_balance);
 
+        int game_id = cs~load_uint(32);
+
         send_raw_message(
             begin_cell()
                 .store_uint(0x18, 6)
@@ -40,6 +42,7 @@ const slice skip_address = "EQB-IYDWa-H6QwFLw04_c50RwbNuEFtbJxPGkfpwZ6vtsaD2"a;
                 .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
                 .store_uint(op::calculate, 32)
                 .store_slice(sender)
+                .store_uint(game_id, 32)
             .end_cell(),
            64
         );
@@ -48,6 +51,8 @@ const slice skip_address = "EQB-IYDWa-H6QwFLw04_c50RwbNuEFtbJxPGkfpwZ6vtsaD2"a;
         throw_unless(error::invalid_address, equal_slice_bits(sender, skip_address));
 
         slice user = in_msg_body~load_msg_addr();
+
+        int game_id = cs~load_uint(32);
 
         randomize_lt();
     
@@ -60,6 +65,7 @@ const slice skip_address = "EQB-IYDWa-H6QwFLw04_c50RwbNuEFtbJxPGkfpwZ6vtsaD2"a;
                     .store_slice(user)
                     .store_coins(msg_value * 2)
                     .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+                    .store_uint(game_id, 32)
                 .end_cell(),
                 0
             );
