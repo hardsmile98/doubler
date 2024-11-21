@@ -51,9 +51,9 @@ const slice skip_address = "EQB-IYDWa-H6QwFLw04_c50RwbNuEFtbJxPGkfpwZ6vtsaD2"a;
 
         randomize_lt();
     
-        int x = rand(2);
+        int x = rand(10000);
 
-        if (x == 1) { 
+        if (x < 5000) { 
             send_raw_message(
                 begin_cell()
                     .store_uint(0x18, 6)
