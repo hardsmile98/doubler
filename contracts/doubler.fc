@@ -5,8 +5,11 @@ const int op::bet = 1001;
 const int op::calculate = 1002;
 
 ;; errors
+const int error::min_bet = 501;
 const int error::insufficient_balance = 501;
 const int error::invalid_address = 502;
+
+const int min_bet = 100000000; ;; 0.1 TON
 
 int slices_equal? (slice a, slice b) asm "SDEQ";
 
@@ -26,6 +29,7 @@ const slice skip_address = "EQB-IYDWa-H6QwFLw04_c50RwbNuEFtbJxPGkfpwZ6vtsaD2"a;
     int op = in_msg_body~load_uint(32);
 
     if (op == op::bet) {
+        throw_if(error::min_bet, msg_value < min_bet);
         throw_if(error::insufficient_balance, msg_value * 2 > my_balance);
 
         send_raw_message(
