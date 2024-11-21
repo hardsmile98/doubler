@@ -5,5 +5,5 @@ import { compile, NetworkProvider } from '@ton/blueprint';
 export async function run(provider: NetworkProvider) {
     const doubler = provider.open(Doubler.createFromConfig({}, await compile('Doubler')));
 
-    await doubler.sendBet(provider.sender(), toNano('0.001'));
+    await doubler.sendBet(provider.sender(), toNano('0.02'));
 }
