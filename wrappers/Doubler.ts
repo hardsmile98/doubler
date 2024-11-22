@@ -13,7 +13,7 @@ export class Doubler implements Contract {
         return new Doubler(address);
     }
 
-    static createFromConfig(config: DoublerConfig, code: Cell, workchain = 0) {
+    static createFromConfig(_config: DoublerConfig, code: Cell, workchain = 0) {
         const data = doublerConfigToCell();
         const init = { code, data };
         return new Doubler(contractAddress(workchain, init), init);
@@ -25,15 +25,6 @@ export class Doubler implements Contract {
             sendMode: SendMode.PAY_GAS_SEPARATELY,
             body: beginCell().endCell(),
         });
-    }
-
-    async getStorage(provider: ContractProvider) {
-        const result = (await provider.get('get_storage', [])).stack;
-        const owner = result.readAddress();
-
-        return {
-            owner,
-        }
     }
 
     async sendBet(
